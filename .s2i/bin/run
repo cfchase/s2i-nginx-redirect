@@ -1,0 +1,23 @@
+#!/bin/bash
+
+source /opt/app-root/etc/generate_container_user
+
+set -e
+
+source ${NGINX_CONTAINER_SCRIPTS_PATH}/common.sh
+
+process_extending_files ${NGINX_APP_ROOT}/src/nginx-start ${NGINX_CONTAINER_SCRIPTS_PATH}/nginx-start
+
+if [ ! -v NGINX_LOG_TO_VOLUME -a -v NGINX_LOG_PATH ]; then
+    /bin/ln -s /dev/stdout ${NGINX_LOG_PATH}/access.log
+    /bin/ln -s /dev/stderr ${NGINX_LOG_PATH}/error.log
+fi
+
+# edit nginx.conf to use API URLs
+# editing in /tmp because sed doesn't have permission to the $NGINX_CONF_PATH for it's temporary file
+cp ${NGINX_CONF_PATH} /tmp/nginx.conf
+sed -i "s|<redirect_url/>|${REDIRECT_URL}|" /tmp/nginx.conf
+cp /tmp/nginx.conf ${NGINX_CONF_PATH}
+# end - edit
+
+exec nginx -g "daemon off;"
