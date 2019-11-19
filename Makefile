@@ -7,10 +7,9 @@ endif
 
 .DEFAULT_GOAL := build
 
-.PHONY: oc-login
-oc-login:
-	${OC} login ${OC_URL} -u ${OC_USER} -p ${OC_PASSWORD} --insecure-skip-tls-verify=true
-	${OC} project ${PROJECT} 2> /dev/null || oc new-project ${PROJECT}
+.PHONY: login
+login:
+	./install/login.sh
 
 .PHONY: build
 build:
@@ -21,14 +20,14 @@ push:
 	./install/push.sh
 
 .PHONY: deploy
-deploy: oc-login
+deploy: login
 	./install/deploy.sh
 
 .PHONY: rollout
-rollout: oc-login
+rollout: login
 	./install/rollout.sh
 
 .PHONY: undeploy
-undeploy: oc-login
+undeploy: login
 	./install/undeploy.sh
 
